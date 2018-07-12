@@ -16,7 +16,7 @@ def print_help():
         'construct a default pom.xml, after this, you can use maven to manager your jar',
         'jpm search name',
         'if you are not very sure for your jar\'s name or group, you can search it',
-        'jpm install (jarName) [jarGroup]',
+        'jpm install [jarGroup] (jarName)',
         'install the lastest released jar [groupId] (groupId is optional)'))
 
 
