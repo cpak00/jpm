@@ -12,11 +12,12 @@ def sqlite3_connect():
     con = sqlite3.connect(db)
     con.execute('''
     create table if not exists "versions" (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT ,
         artifactId TEXT,
         groupId TEXT,
         version TEXT,
-        orderId INT
+        orderId INT,
+        link TEXT,
+        PRIMARY KEY(artifactId, groupId, version)
     )
     ''')
 
@@ -27,15 +28,17 @@ def get_all_title(url):
     
     meta = tree.xpath('//a[@title="maven-metadata.xml"]/@href')
     if len(meta) == 1:
-        parse_meta(url + '/' + meta[0])
+        parse_meta(url, meta[0])
     else:
         groups = tree.xpath('//a[contains(@title, "/")]/@title')
         for i in range(len(groups)):
             get_all_title(url + '/' + groups[i].split('/')[0])
 
 
-def parse_meta(url):
+def parse_meta(origin_url, meta_url):
+    url = origin_url + '/' + meta_url
     print(url)
+    
     global con
     r = requests.get(url)
     tree = etree.XML(r.text.encode('utf-8'))
@@ -46,12 +49,12 @@ def parse_meta(url):
         if con:
             try:
                 sql = '''
-                insert into versions values(null, ?, ?, ?, ?)
+                insert into versions values(?, ?, ?, ?, ?)
                 '''
                 params = []
                 i = 0
                 for version in versions:
-                    param = [artifactId, groupId, version, i]
+                    param = [artifactId, groupId, version, i, origin_url]
                     i += 1
                     params.append(param)
                 # print(params)
